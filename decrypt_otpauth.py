@@ -76,7 +76,7 @@ class OTPAccount:
         self.refDate = refDate
 
     def __repr__(self):
-        return f'<OTPAccount: {self.label} ({self.issuer}), Secret: 0x{self.secret.hex()}, Type: {self.type}, Algorithm: {self.algorithm}, Digits: {self.digits}, Counter: {self.counter}, Period: {self.period}, Reference Date: {self.refDate}>'
+        return f'<OTPAccount: {self.issuer} ({self.label})>'
 
     def decode_archive(archive):
         label = archive.decode("label")
