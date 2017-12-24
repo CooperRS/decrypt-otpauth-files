@@ -16,7 +16,10 @@ Requires:
 git clone https://github.com/CooperRS/decrypt-otpauth-files.git
 cd decrypt-otpauth-files
 pipenv install
-pipenv run python decrypt_otpauth.py --encrypted-otpauth-backup <path to your OTP Auth backup>
+# Decrypt a full backup file
+pipenv run python decrypt_otpauth.py decrypt_backup --encrypted-otpauth-backup <path to your OTP Auth backup>
+# Decrypt a single account export
+pipenv run python decrypt_otpauth.py decrypt_account --encrypted-otpauth-account <path to your OTP Auth account>
 ```
 
 ## Demo
@@ -27,6 +30,8 @@ The project contains two OTP Auth exports for demo purposes:
 * `account.otpauth`: One account exported by OTP Auth
 
 The password for both files is `abc123`.
+
+![example gif](demo.gif)
 
 ## Credits
 

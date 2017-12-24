@@ -1,35 +1,44 @@
+import base64
 import click
 import getpass
+import hashlib
 
 from enum import Enum
+from urllib.parse import quote
 
-from Crypto.Cipher import AES
-import hashlib
+import pyqrcode
 
 from bpylist import archiver
 from bpylist.archive_types import uid
 
+from Crypto.Cipher import AES
+
+
 class Type(Enum):
-	Unknown = 0
-	HOTP = 1
-	TOTP = 2
+    Unknown = 0
+    HOTP = 1
+    TOTP = 2
+
 
 class Algorithm(Enum):
-	Unknown = 0
-	SHA1 = 1 # Used in case of Unknown
-	SHA256 = 2
-	SHA512 = 3
-	MD5 = 4
+    Unknown = 0
+    SHA1 = 1  # Used in case of Unknown
+    SHA256 = 2
+    SHA512 = 3
+    MD5 = 4
+
 
 class MutableString:
 
     def decode_archive(archive):
         return archive.decode('NS.string')
 
+
 class MutableData:
 
     def decode_archive(archive):
         return bytes(archive.decode('NS.data'))
+
 
 class OTPFolder:
     name = None
@@ -40,16 +49,17 @@ class OTPFolder:
         self.accounts = accounts
 
     def __repr__(self):
-        return f'<OTPFolder: {self.name}, {self.accounts}>'
+        return f'<OTPFolder: {self.name}>'
 
     def decode_archive(archive):
         name = archive.decode('name')
         accounts = archive.decode('accounts')
         return OTPFolder(name, accounts)
 
+
 class OTPAccount:
     label = None
-    issue = None
+    issuer = None
     secret = None
     type = None
     algorithm = None
@@ -70,7 +80,7 @@ class OTPAccount:
         self.refDate = refDate
 
     def __repr__(self):
-        return f'<OTPAccount: {self.label} ({self.issuer}), Secret: 0x{self.secret.hex()}, Type: {self.type}, Algorithm: {self.algorithm}, Digits: {self.digits}, Counter: {self.counter}, Period: {self.period}, Reference Date: {self.refDate}>'
+        return f'<OTPAccount: {self.issuer} ({self.label})>'
 
     def decode_archive(archive):
         label = archive.decode("label")
@@ -84,10 +94,38 @@ class OTPAccount:
         refDate = archive.decode("refDate")
         return OTPAccount(label, issuer, secret, type, algorithm, digits, counter, period, refDate)
 
+    def from_dict(in_dict):
+        label = in_dict.get("label")
+        issuer = in_dict.get("issuer")
+        secret = bytes(in_dict.get("secret"))
+        type = Type(in_dict.get("type"))
+        algorithm = Algorithm(in_dict.get("algorithm"))
+        digits = in_dict.get("digits")
+        counter = in_dict.get("counter")
+        period = in_dict.get("period")
+        refDate = in_dict.get("refDate")
+        return OTPAccount(label, issuer, secret, type, algorithm, digits, counter, period, refDate)
+
+    def otp_uri(self):
+        otp_type = self.type
+        otp_label = quote(f'{self.issuer}:{self.label}')
+        otp_parameters = {
+            'secret': base64.b32encode(self.secret).decode("utf-8"),
+            'algorithm': self.algorithm,
+            'period': self.period,
+            'digits': self.digits,
+            'issuer': self.issuer,
+            'counter': self.counter,
+        }
+        otp_parameters = '&'.join([f'{str(k)}={quote(str(v))}' for (k, v) in otp_parameters.items() if v])
+        return f'otpauth://{otp_type}/{otp_label}?{otp_parameters}'
+
+
 archiver.update_class_map({'NSMutableData': MutableData})
 archiver.update_class_map({'NSMutableString': MutableString})
 archiver.update_class_map({'ACOTPFolder': OTPFolder})
 archiver.update_class_map({'ACOTPAccount': OTPAccount})
+
 
 class DangerousUnarchive(archiver.Unarchive):
 
@@ -116,45 +154,63 @@ class DangerousUnarchive(archiver.Unarchive):
         self.unpacked_uids[index] = obj
         return obj
 
-# @click.command()
-# @click.option('--encrypted-otpauth-account',
-#               help="path to your encrypted OTP Auth account (.otpauth)",
-#               required=True,
-#               type=click.File('rb'))
-# def main(encrypted_otpauth_account):
-#     # Get password from user
-#     password = getpass.getpass(f'Password for export file {encrypted_otpauth_account.name}: ')
 
-#     # Get IV and key for wrapping archive
-#     iv = bytes(16)
-#     key = hashlib.sha256('OTPAuth'.encode('utf-8')).digest()
+def render_qr_to_terminal(otp_uri, type, issuer, label):
+    qr = pyqrcode.create(otp_uri, error="L")
+    click.echo("")
+    click.echo(f'{type}: {issuer} - {label}')
+    click.echo(qr.terminal(quiet_zone=4))
+    click.echo("")
 
-#     # Decrypt wrapping archive
-#     data = AES.new(key, AES.MODE_CBC, iv).decrypt(encrypted_otpauth_account.read())
-#     data = data[:-data[-1]]
 
-#     # Decode wrapping archive
-#     archive = DangerousUnarchive(data).top_object()
+@click.group()
+def cli():
+    pass
 
-#     # Get IV and key for actual archive
-#     iv = hashlib.sha1(archive['IV']).digest()[:16]
-#     salt = archive['Salt']
-#     key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
-    
-#     # Decrypt actual archive
-#     data = AES.new(key, AES.MODE_CBC, iv).decrypt(archive['Data'])
-#     data = data[:-data[-1]]
 
-#     # Decode actual archive
-#     archive = DangerousUnarchive(data).top_object()
-#     print(archive)
+@cli.command()
+@click.option('--encrypted-otpauth-account',
+              help="path to your encrypted OTP Auth account (.otpauth)",
+              required=True,
+              type=click.File('rb'))
+def decrypt_account(encrypted_otpauth_account):
+    # Get password from user
+    password = getpass.getpass(f'Password for export file {encrypted_otpauth_account.name}: ')
 
-@click.command()
+    # Get IV and key for wrapping archive
+    iv = bytes(16)
+    key = hashlib.sha256('OTPAuth'.encode('utf-8')).digest()
+
+    # Decrypt wrapping archive
+    data = AES.new(key, AES.MODE_CBC, iv).decrypt(encrypted_otpauth_account.read())
+    data = data[:-data[-1]]
+
+    # Decode wrapping archive
+    archive = archiver.Unarchive(data).top_object()
+
+    # Get IV and key for actual archive
+    iv = hashlib.sha1(archive['IV']).digest()[:16]
+    salt = archive['Salt']
+    key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
+
+    # Decrypt actual archive
+    data = AES.new(key, AES.MODE_CBC, iv).decrypt(archive['Data'])
+    data = data[:-data[-1]]
+
+    # Decode actual archive
+    archive = DangerousUnarchive(data).top_object()
+
+    # Construct OTPAccount object from returned dictionary
+    account = OTPAccount.from_dict(archive)
+    render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+
+
+@cli.command()
 @click.option('--encrypted-otpauth-backup',
               help="path to your encrypted OTP Auth backup (.otpauthdb)",
               required=True,
               type=click.File('rb'))
-def main(encrypted_otpauth_backup):
+def decrypt_backup(encrypted_otpauth_backup):
     # Get password from user
     password = getpass.getpass(f'Password for export file {encrypted_otpauth_backup.name}: ')
 
@@ -167,21 +223,25 @@ def main(encrypted_otpauth_backup):
     data = data[:-data[-1]]
 
     # Decode wrapping archive
-    archive = DangerousUnarchive(data).top_object()
+    archive = archiver.Unarchive(data).top_object()
 
     # Get IV and key for actual archive
     iv = hashlib.sha1(archive['IV'].encode('utf-8')).digest()[:16]
     salt = archive['Salt']
     key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
-    
+
     # Decrypt actual archive
     data = AES.new(key, AES.MODE_CBC, iv).decrypt(archive['WrappedData'])
     data = data[:-data[-1]]
 
     # Decode actual archive
     archive = DangerousUnarchive(data).top_object()
-    print(archive)
+
+    accounts = [account for folder in archive['Folders'] for account in folder.accounts]
+    for account in accounts:
+        render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+        input("Press Enter to continue...")
 
 
 if __name__ == '__main__':
-    main()
+    cli()
