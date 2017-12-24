@@ -28,6 +28,8 @@ The project contains two OTP Auth exports for demo purposes:
 
 The password for both files is `abc123`.
 
+![example gif](demo.gif)
+
 ## Credits
 
 Inspired by [ewdurbin](https://github.com/ewdurbin) and his [evacuate_2STP](https://github.com/ewdurbin/evacuate_2stp) repo.
