@@ -55,7 +55,7 @@ class OTPFolder:
 
 class OTPAccount:
     label = None
-    issue = None
+    issuer = None
     secret = None
     type = None
     algorithm = None
