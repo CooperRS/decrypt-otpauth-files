@@ -1,13 +1,18 @@
+import base64
 import click
 import getpass
+import hashlib
 
 from enum import Enum
+from itertools import chain
+from urllib.parse import quote
 
-from Crypto.Cipher import AES
-import hashlib
+import pyqrcode
 
 from bpylist import archiver
 from bpylist.archive_types import uid
+
+from Crypto.Cipher import AES
 
 
 class Type(Enum):
@@ -156,7 +161,27 @@ def main(encrypted_otpauth_backup):
 
     # Decode actual archive
     archive = DangerousUnarchive(data).top_object()
-    print(archive)
+
+    accounts = [account for folder in archive['Folders'] for account in folder.accounts]
+    for account in accounts:
+        otp_type = account.type
+        otp_label = quote(f'{account.issuer}:{account.label}')
+        otp_parameters = {
+            'secret': base64.b32encode(account.secret).decode("utf-8"),
+            'algorithm': account.algorithm,
+            'period': account.period,
+            'digits': account.digits,
+            'issuer': account.issuer,
+            'counter': account.counter,
+        }
+        otp_parameters = '&'.join([f'{str(k)}={quote(str(v))}' for (k, v) in otp_parameters.items() if v])
+        otp_uri = f'otpauth://{otp_type}/{otp_label}?{otp_parameters}'
+        qr = pyqrcode.create(otp_uri, error="L")
+        click.echo("")
+        click.echo(f'{account.type}: {account.issuer} - {account.label}')
+        click.echo(qr.terminal(quiet_zone=4))
+        click.echo("")
+        input("Press Enter to continue...")
 
 
 if __name__ == '__main__':
