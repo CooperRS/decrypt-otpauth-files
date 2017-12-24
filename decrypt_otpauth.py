@@ -9,27 +9,32 @@ import hashlib
 from bpylist import archiver
 from bpylist.archive_types import uid
 
+
 class Type(Enum):
-	Unknown = 0
-	HOTP = 1
-	TOTP = 2
+    Unknown = 0
+    HOTP = 1
+    TOTP = 2
+
 
 class Algorithm(Enum):
-	Unknown = 0
-	SHA1 = 1 # Used in case of Unknown
-	SHA256 = 2
-	SHA512 = 3
-	MD5 = 4
+    Unknown = 0
+    SHA1 = 1  # Used in case of Unknown
+    SHA256 = 2
+    SHA512 = 3
+    MD5 = 4
+
 
 class MutableString:
 
     def decode_archive(archive):
         return archive.decode('NS.string')
 
+
 class MutableData:
 
     def decode_archive(archive):
         return bytes(archive.decode('NS.data'))
+
 
 class OTPFolder:
     name = None
@@ -46,6 +51,7 @@ class OTPFolder:
         name = archive.decode('name')
         accounts = archive.decode('accounts')
         return OTPFolder(name, accounts)
+
 
 class OTPAccount:
     label = None
@@ -84,10 +90,12 @@ class OTPAccount:
         refDate = archive.decode("refDate")
         return OTPAccount(label, issuer, secret, type, algorithm, digits, counter, period, refDate)
 
+
 archiver.update_class_map({'NSMutableData': MutableData})
 archiver.update_class_map({'NSMutableString': MutableString})
 archiver.update_class_map({'ACOTPFolder': OTPFolder})
 archiver.update_class_map({'ACOTPAccount': OTPAccount})
+
 
 class DangerousUnarchive(archiver.Unarchive):
 
@@ -116,38 +124,6 @@ class DangerousUnarchive(archiver.Unarchive):
         self.unpacked_uids[index] = obj
         return obj
 
-# @click.command()
-# @click.option('--encrypted-otpauth-account',
-#               help="path to your encrypted OTP Auth account (.otpauth)",
-#               required=True,
-#               type=click.File('rb'))
-# def main(encrypted_otpauth_account):
-#     # Get password from user
-#     password = getpass.getpass(f'Password for export file {encrypted_otpauth_account.name}: ')
-
-#     # Get IV and key for wrapping archive
-#     iv = bytes(16)
-#     key = hashlib.sha256('OTPAuth'.encode('utf-8')).digest()
-
-#     # Decrypt wrapping archive
-#     data = AES.new(key, AES.MODE_CBC, iv).decrypt(encrypted_otpauth_account.read())
-#     data = data[:-data[-1]]
-
-#     # Decode wrapping archive
-#     archive = DangerousUnarchive(data).top_object()
-
-#     # Get IV and key for actual archive
-#     iv = hashlib.sha1(archive['IV']).digest()[:16]
-#     salt = archive['Salt']
-#     key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
-    
-#     # Decrypt actual archive
-#     data = AES.new(key, AES.MODE_CBC, iv).decrypt(archive['Data'])
-#     data = data[:-data[-1]]
-
-#     # Decode actual archive
-#     archive = DangerousUnarchive(data).top_object()
-#     print(archive)
 
 @click.command()
 @click.option('--encrypted-otpauth-backup',
@@ -167,13 +143,13 @@ def main(encrypted_otpauth_backup):
     data = data[:-data[-1]]
 
     # Decode wrapping archive
-    archive = DangerousUnarchive(data).top_object()
+    archive = archiver.Unarchive(data).top_object()
 
     # Get IV and key for actual archive
     iv = hashlib.sha1(archive['IV'].encode('utf-8')).digest()[:16]
     salt = archive['Salt']
     key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
-    
+
     # Decrypt actual archive
     data = AES.new(key, AES.MODE_CBC, iv).decrypt(archive['WrappedData'])
     data = data[:-data[-1]]
