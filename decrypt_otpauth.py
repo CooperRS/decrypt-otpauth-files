@@ -45,7 +45,7 @@ class OTPFolder:
         self.accounts = accounts
 
     def __repr__(self):
-        return f'<OTPFolder: {self.name}, {self.accounts}>'
+        return f'<OTPFolder: {self.name}>'
 
     def decode_archive(archive):
         name = archive.decode('name')
