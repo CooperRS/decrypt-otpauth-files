@@ -22,6 +22,15 @@ class Type(Enum):
     HOTP = 1
     TOTP = 2
 
+    @property
+    def uri_value(self):
+        if self.value == 0:
+            return 'unknown'
+        if self.value == 1:
+            return 'hotp'
+        if self.value == 2:
+            return 'totp'
+
 
 class Algorithm(Enum):
     Unknown = 0
@@ -110,7 +119,7 @@ class OTPAccount:
         return OTPAccount(label, issuer, secret, type, algorithm, digits, counter, period, refDate)
 
     def otp_uri(self):
-        otp_type = self.type
+        otp_type = self.type.uri_value
         otp_label = quote(f'{self.issuer}:{self.label}')
         otp_parameters = {
             'secret': base64.b32encode(self.secret).decode("utf-8"),
