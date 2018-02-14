@@ -205,7 +205,7 @@ def decrypt_account(encrypted_otpauth_account):
     elif archive['Version'] == 1.2:
         account = decrypt_account_12(archive, password)
     else:
-        print('Encountered unknow file version', archive['Version'])
+        click.echo(f'Encountered unknow file version: {archive["Version"]}')
         return
 
     render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
@@ -264,7 +264,7 @@ def decrypt_backup(encrypted_otpauth_backup):
     elif archive['Version'] == 1.1:
         accounts = decrypt_backup_11(archive, password)
     else:
-        print('Encountered unknow file version', archive['Version'])
+        click.echo(f'Encountered unknow file version: {archive["Version"]}')
         return
 
     for account in accounts:
