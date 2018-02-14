@@ -16,6 +16,7 @@ from Crypto.Cipher import AES
 from rncryptor import RNCryptor
 from rncryptor import bord
 
+
 class Type(Enum):
     Unknown = 0
     HOTP = 1
@@ -128,6 +129,7 @@ archiver.update_class_map({'NSMutableString': MutableString})
 archiver.update_class_map({'ACOTPFolder': OTPFolder})
 archiver.update_class_map({'ACOTPAccount': OTPAccount})
 
+
 class RawRNCryptor(RNCryptor):
 
     def post_decrypt_data(self, data):
@@ -135,6 +137,7 @@ class RawRNCryptor(RNCryptor):
            appear over padding for AES (PKCS#7)."""
         data = data[:-bord(data[-1])]
         return data
+
 
 class DangerousUnarchive(archiver.Unarchive):
 
@@ -204,11 +207,12 @@ def decrypt_account(encrypted_otpauth_account):
     else:
         print('Encountered unknow file version', archive['Version'])
         return
-    
+
     render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
 
+
 def decrypt_account_11(archive, password):
-	# Get IV and key for actual archive
+    # Get IV and key for actual archive
     iv = hashlib.sha1(archive['IV']).digest()[:16]
     salt = archive['Salt']
     key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
@@ -223,6 +227,7 @@ def decrypt_account_11(archive, password):
     # Construct OTPAccount object from returned dictionary
     return OTPAccount.from_dict(archive)
 
+
 def decrypt_account_12(archive, password):
     # Decrypt using RNCryptor
     data = data = RawRNCryptor().decrypt(archive['Data'], password)
@@ -232,6 +237,7 @@ def decrypt_account_12(archive, password):
 
     # Construct OTPAccount object from returned dictionary
     return OTPAccount.from_dict(archive)
+
 
 @cli.command()
 @click.option('--encrypted-otpauth-backup',
@@ -265,8 +271,9 @@ def decrypt_backup(encrypted_otpauth_backup):
         render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
         input("Press Enter to continue...")
 
+
 def decrypt_backup_10(archive, password):
-	# Get IV and key for actual archive
+    # Get IV and key for actual archive
     iv = hashlib.sha1(archive['IV'].encode('utf-8')).digest()[:16]
     salt = archive['Salt']
     key = hashlib.sha256((salt + '-' + password).encode('utf-8')).digest()
@@ -280,6 +287,7 @@ def decrypt_backup_10(archive, password):
 
     return [account for folder in archive['Folders'] for account in folder.accounts]
 
+
 def decrypt_backup_11(archive, password):
     # Decrypt using RNCryptor
     data = data = RawRNCryptor().decrypt(archive['WrappedData'], password)
@@ -288,6 +296,7 @@ def decrypt_backup_11(archive, password):
     archive = DangerousUnarchive(data).top_object()
 
     return [account for folder in archive['Folders'] for account in folder.accounts]
+
 
 if __name__ == '__main__':
     cli()
