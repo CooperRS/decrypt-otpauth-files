@@ -122,7 +122,7 @@ class OTPAccount:
         otp_type = self.type.uri_value
         otp_label = quote(f'{self.issuer}:{self.label}')
         otp_parameters = {
-            'secret': base64.b32encode(self.secret).decode("utf-8"),
+            'secret': base64.b32encode(self.secret).decode("utf-8").rstrip("="),
             'algorithm': self.algorithm,
             'period': self.period,
             'digits': self.digits,
