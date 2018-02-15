@@ -39,6 +39,19 @@ class Algorithm(Enum):
     SHA512 = 3
     MD5 = 4
 
+    @property
+    def uri_value(self):
+        if self.value == 0:
+            return 'sha1'
+        if self.value == 1:
+            return 'sha1'
+        if self.value == 2:
+            return 'sha256'
+        if self.value == 3:
+            return 'sha512'
+        if self.value == 4:
+            return 'md5'
+
 
 class MutableString:
 
@@ -123,7 +136,7 @@ class OTPAccount:
         otp_label = quote(f'{self.issuer}:{self.label}')
         otp_parameters = {
             'secret': base64.b32encode(self.secret).decode("utf-8").rstrip("="),
-            'algorithm': self.algorithm,
+            'algorithm': self.algorithm.uri_value,
             'period': self.period,
             'digits': self.digits,
             'issuer': self.issuer,
