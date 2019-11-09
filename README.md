@@ -8,7 +8,7 @@ If you find problems with the file format (in particular security related issues
 
 Requires:
 
-  - [Python 3.6](https://www.python.org/downloads/)
+  - [Python 3.7](https://www.python.org/downloads/)
   - [pipenv](https://docs.pipenv.org)
   - An encrypted OTP Auth backup/account file
 

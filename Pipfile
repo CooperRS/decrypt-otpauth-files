@@ -13,4 +13,4 @@ pyqrcode = "==1.2.1"
 pycryptodome = "==3.9.1"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
