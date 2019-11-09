@@ -4,20 +4,35 @@ This tool allows for decrypting the encrypted backups/account files created by [
 
 If you find problems with the file format (in particular security related issues), do not hesitate and file an issue.
 
-## Usage
-
-Requires:
+## Requirements
 
   - [Python 3.7](https://www.python.org/downloads/)
-  - [pipenv](https://docs.pipenv.org)
+  - [pipenv](https://github.com/pypa/pipenv)
   - An encrypted OTP Auth backup/account file
+
+## Usage
+
+1. Clone repository
 
 ```
 git clone https://github.com/CooperRS/decrypt-otpauth-files.git
 cd decrypt-otpauth-files
+```
+
+2. Install dependencies
+
+```
 pipenv install
+```
+
+3. Decrypt your OTP Auth file
+
+```
 # Decrypt a full backup file
 pipenv run python decrypt_otpauth.py decrypt_backup --encrypted-otpauth-backup <path to your OTP Auth backup>
+```
+
+```
 # Decrypt a single account export
 pipenv run python decrypt_otpauth.py decrypt_account --encrypted-otpauth-account <path to your OTP Auth account>
 ```
