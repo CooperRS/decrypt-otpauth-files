@@ -10,6 +10,7 @@ If you find problems with the file format (in particular security related issues
 
 ## Changes in this fork
   - Updated to Python 3.8
+  - Updated to RNCryptor 3.3.0 (due to time.clock() in Py3.8 error see [RNCryptor Issue[(https://github.com/RNCryptor/RNCryptor-python/issues/7#issuecomment-490620407))
   - Changed to Cryptodomex 3.9.7 (due to conflics with pycrypto in Py3.8)
   - Changed from byplist to byplist2 (due to ascii encoding error of the plist generator)
   - Added full decode and encode of all original .plist content from Auth OTP backup file
@@ -17,8 +18,6 @@ If you find problems with the file format (in particular security related issues
   - Added function Read andOTP Accounts (Android) into classes and store as encrypted Auth OTP backup for Iphone
 
 ## Known Issues
-  - time.clock() error: `AttributeError: module 'time' has no attribute 'clock'`  
-    => Solution: Change `time.clock()` to `time.process_time()` in the `Crypto/Random/_UserFriendlyRNG.py` of your virtual environment lib files
   - The source code is a total mess, but "worked on my computer"
   - Usage at your own Risk (maybe don't try it on your single daily phone with all accounts on... :-)
   - Written for my personal use and own requirements - yours might differ
