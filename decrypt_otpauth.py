@@ -15,7 +15,7 @@ import pyqrcode
 from bpylist import archiver
 from bpylist.archive_types import timestamp
 
-from Cryptodome.Cipher import AES
+from Crypto.Cipher import AES
 
 from rncryptor import RNCryptor
 from rncryptor import bord
