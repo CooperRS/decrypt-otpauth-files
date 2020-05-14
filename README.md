@@ -14,8 +14,8 @@ If you find problems with the file format (in particular security related issues
   - Changed to Cryptodomex 3.9.7 (due to conflics with pycrypto in Py3.8)
   - Changed from byplist to byplist2 (due to ascii encoding error of the plist generator)
   - Added full decode and encode of all original .plist content from Auth OTP backup file
-  - Added function to read password encrypted AndOtp Backup Files and print QR codes
-  - Added function Read andOTP Accounts (Android) into classes and store as encrypted Auth OTP backup for Iphone
+  - Added function to read password encrypted andOtp backup files and print QR codes
+  - Added function to read andOTP accounts (Android) into classes and store as encrypted Auth OTP backup for iPhone
 
 ## Known Issues
   - The source code is a total mess, but "worked on my computer"
