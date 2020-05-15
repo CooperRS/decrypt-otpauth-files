@@ -1,4 +1,4 @@
-# decrypt-otpauth-files
+# andotp-otpauth-converter
 
 This version was forked to add some functions while keeping the excellent original functionality untouched.
 
