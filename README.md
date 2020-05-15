@@ -11,7 +11,7 @@ If you find problems with the file format (in particular security related issues
 ## Changes in this fork
   - Updated to Python 3.8
   - Updated to RNCryptor 3.3.0 (due to time.clock() in Py3.8 error see [RNCryptor Issue](https://github.com/RNCryptor/RNCryptor-python/issues/7#issuecomment-490620407))
-  - Changed to Cryptodomex 3.9.7 (due to conflics with pycrypto in Py3.8)
+  - Updated to Cryptodome 3.9.7
   - Changed from byplist to byplist2 (due to ascii encoding error of the plist generator)
   - Added full decode and encode of all original .plist content from Auth OTP backup file
   - Added function to read password encrypted andOtp backup files and print QR codes
