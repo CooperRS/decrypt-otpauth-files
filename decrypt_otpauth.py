@@ -201,13 +201,14 @@ def render_qr_to_terminal(otp_uri, type, issuer, label):
 
 def write_accounts_to_pdf(accounts, pdf_path):
     pdf = SimpleDocTemplate(pdf_path)
-    stylesheet = getSampleStyleSheet()
+    body_style = getSampleStyleSheet()['BodyText']
     flowables = []
     for index, account in enumerate(accounts):
         b = BytesIO()
         qr = pyqrcode.create(account.otp_uri(), error="L")
         qr.png(b)
-        flowables.append(Paragraph(f'{account.type}: {account.issuer} - {account.label}', stylesheet['BodyText']))
+        desc = f'{account.type}: {account.issuer} - {account.label}'
+        flowables.append(Paragraph(desc, body_style))
         flowables.append(Image(b, 300, 300))
         if index % 2 == 1:
             flowables.append(PageBreak())
