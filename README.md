@@ -37,6 +37,14 @@ pipenv run python decrypt_otpauth.py decrypt_backup --encrypted-otpauth-backup <
 pipenv run python decrypt_otpauth.py decrypt_account --encrypted-otpauth-account <path to your OTP Auth account>
 ```
 
+## Outputting PDF
+
+If you'd prefer to store analog backups (e.g. by printing the QR codes and putting them in a safe), both decryption commands support an option to output a PDF file:
+
+```
+pipenv run python decrypt_otpauth.py decrypt_backup --encrypted-otpauth-backup <otp_auth_backup_path> --pdf-out <pdf_path>
+```
+
 ## Demo
 
 The project contains two OTP Auth exports for demo purposes:
