@@ -223,7 +223,10 @@ def cli():
               help="path to your encrypted OTP Auth account (.otpauth)",
               required=True,
               type=click.File('rb'))
-def decrypt_account(encrypted_otpauth_account):
+@click.option('--pdf-out',
+              help="path to output an PDF file instead of printing to the terminal",
+              required=False)
+def decrypt_account(encrypted_otpauth_account, pdf_out):
     # Get password from user
     password = getpass.getpass(f'Password for export file {encrypted_otpauth_account.name}: ')
 
@@ -246,7 +249,10 @@ def decrypt_account(encrypted_otpauth_account):
         click.echo(f'Encountered unknow file version: {archive["Version"]}')
         return
 
-    render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+    if not pdf_out:
+        render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+    else:
+        write_accounts_to_pdf([account], pdf_out)
 
 
 def decrypt_account_11(archive, password):
