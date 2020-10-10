@@ -2,6 +2,7 @@ import base64
 import click
 import getpass
 import hashlib
+from io import BytesIO
 
 from enum import Enum
 from urllib.parse import quote
@@ -16,6 +17,8 @@ from Crypto.Cipher import AES
 from rncryptor import RNCryptor
 from rncryptor import bord
 
+from reportlab.platypus import SimpleDocTemplate, PageBreak, Image, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 class Type(Enum):
     Unknown = 0
@@ -196,10 +199,19 @@ def render_qr_to_terminal(otp_uri, type, issuer, label):
     click.echo(qr.terminal(quiet_zone=4))
     click.echo("")
 
-def write_accounts_to_pdf(accounts):
-    for account in accounts:
+def write_accounts_to_pdf(accounts, pdf_path):
+    pdf = SimpleDocTemplate(pdf_path)
+    stylesheet = getSampleStyleSheet()
+    flowables = []
+    for index, account in enumerate(accounts):
+        b = BytesIO()
         qr = pyqrcode.create(account.otp_uri(), error="L")
-        print(qr.png_as_base64_str())
+        qr.png(b)
+        flowables.append(Paragraph(f'{account.type}: {account.issuer} - {account.label}', stylesheet['BodyText']))
+        flowables.append(Image(b, 300, 300))
+        if index % 2 == 1:
+            flowables.append(PageBreak())
+    pdf.build(flowables)
 
 @click.group()
 def cli():
@@ -301,7 +313,7 @@ def decrypt_backup(encrypted_otpauth_backup, pdf_out):
             render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
             input("Press Enter to continue...")
     else:
-        write_accounts_to_pdf(accounts)
+        write_accounts_to_pdf(accounts, pdf_out)
 
 
 def decrypt_backup_10(archive, password):

@@ -12,6 +12,7 @@ click = "==6.7"
 pyqrcode = "==1.2.1"
 pycryptodome = "==3.9.1"
 pypng = "*"
+reportlab = "*"
 
 [requires]
 python_version = "3.7"
