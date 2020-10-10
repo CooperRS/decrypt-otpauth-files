@@ -11,6 +11,7 @@ bpylist = "==0.1.4"
 click = "==6.7"
 pyqrcode = "==1.2.1"
 pycryptodome = "==3.9.1"
+pypng = "*"
 
 [requires]
 python_version = "3.7"

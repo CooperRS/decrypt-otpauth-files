@@ -196,6 +196,10 @@ def render_qr_to_terminal(otp_uri, type, issuer, label):
     click.echo(qr.terminal(quiet_zone=4))
     click.echo("")
 
+def write_accounts_to_pdf(accounts):
+    for account in accounts:
+        qr = pyqrcode.create(account.otp_uri(), error="L")
+        print(qr.png_as_base64_str())
 
 @click.group()
 def cli():
@@ -266,7 +270,10 @@ def decrypt_account_12(archive, password):
               help="path to your encrypted OTP Auth backup (.otpauthdb)",
               required=True,
               type=click.File('rb'))
-def decrypt_backup(encrypted_otpauth_backup):
+@click.option('--pdf-out',
+              help="path to output an PDF file instead of printing to the terminal",
+              required=False)
+def decrypt_backup(encrypted_otpauth_backup, pdf_out):
     # Get password from user
     password = getpass.getpass(f'Password for export file {encrypted_otpauth_backup.name}: ')
 
@@ -289,9 +296,12 @@ def decrypt_backup(encrypted_otpauth_backup):
         click.echo(f'Encountered unknow file version: {archive["Version"]}')
         return
 
-    for account in accounts:
-        render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
-        input("Press Enter to continue...")
+    if not pdf_out:
+        for account in accounts:
+            render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+            input("Press Enter to continue...")
+    else:
+        write_accounts_to_pdf(accounts)
 
 
 def decrypt_backup_10(archive, password):
