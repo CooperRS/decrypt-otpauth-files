@@ -17,7 +17,7 @@ from Crypto.Cipher import AES
 from rncryptor import RNCryptor
 from rncryptor import bord
 
-from reportlab.platypus import SimpleDocTemplate, PageBreak, Image, Paragraph
+from reportlab.platypus import SimpleDocTemplate, Image, BalancedColumns, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 
 class Type(Enum):
@@ -208,11 +208,9 @@ def write_accounts_to_pdf(accounts, pdf_path):
         qr = pyqrcode.create(account.otp_uri(), error="L")
         qr.png(b, 5)
         desc = f'{account.type}: {account.issuer} - {account.label}'
+        flowables.append(Image(b, 120, 120))
         flowables.append(Paragraph(desc, body_style))
-        flowables.append(Image(b, 300, 300))
-        if index % 2 == 1:
-            flowables.append(PageBreak())
-    pdf.build(flowables)
+    pdf.build([BalancedColumns(flowables, 3)])
 
 @click.group()
 def cli():
