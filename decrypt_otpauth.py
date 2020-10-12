@@ -206,7 +206,7 @@ def write_accounts_to_pdf(accounts, pdf_path):
     for index, account in enumerate(accounts):
         b = BytesIO()
         qr = pyqrcode.create(account.otp_uri(), error="L")
-        qr.png(b)
+        qr.png(b, 5)
         desc = f'{account.type}: {account.issuer} - {account.label}'
         flowables.append(Paragraph(desc, body_style))
         flowables.append(Image(b, 300, 300))
