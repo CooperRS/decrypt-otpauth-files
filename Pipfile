@@ -12,6 +12,7 @@ click = "==6.7"
 pyqrcode = "==1.2.1"
 pypng = "==0.0.20"
 reportlab = "==3.5.53"
+pillow = "==7.2.0"
 
 [requires]
 python_version = "3.7"

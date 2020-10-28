@@ -17,7 +17,8 @@ from Crypto.Cipher import AES
 from rncryptor import RNCryptor
 from rncryptor import bord
 
-from reportlab.platypus import SimpleDocTemplate, Image, BalancedColumns, Paragraph
+import PIL
+from reportlab.platypus import SimpleDocTemplate, Image, BalancedColumns, Paragraph, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
 
 class Type(Enum):
@@ -200,16 +201,33 @@ def render_qr_to_terminal(otp_uri, type, issuer, label):
     click.echo("")
 
 def write_accounts_to_pdf(accounts, pdf_path):
+    class CaptionedQr(Flowable):
+        def __init__(self, img, caption):
+            self.img = img
+            self.caption = caption
+            self.width = 120
+            self.img_height = 120
+            self.height = 160
+            self.caption_line_padding = 10
+        def draw(self):
+            self.canv.drawInlineImage(self.img, 0, 0, self.width, self.img_height)
+            textobj = self.canv.beginText(0, -self.caption_line_padding)
+            # Decide whether to wrap to next line after writing each char
+            for char in self.caption:
+                textobj.textOut(char)
+                if textobj.getX() > self.width:
+                    textobj.moveCursor(0, self.caption_line_padding)
+            self.canv.drawText(textobj)
+
     pdf = SimpleDocTemplate(pdf_path)
-    body_style = getSampleStyleSheet()['BodyText']
     flowables = []
     for index, account in enumerate(accounts):
         b = BytesIO()
         qr = pyqrcode.create(account.otp_uri(), error="L")
         qr.png(b, 5)
-        desc = f'{account.type}: {account.issuer} - {account.label}'
-        flowables.append(Image(b, 120, 120))
-        flowables.append(Paragraph(desc, body_style))
+        caption = f'{account.issuer} - {account.label}'
+        img = PIL.Image.open(b)
+        flowables.append(CaptionedQr(img, caption))
     pdf.build([BalancedColumns(flowables, 3)])
 
 @click.group()
