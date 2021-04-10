@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3a9aa3cf92e33eb33f1ae837e0b466ec0827564e1abc6766112371ee29d937c3"
+            "sha256": "b041e83d7bcdfbcc8abb213d546cae2d1a3c4150987868d6988225243bb96511"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7"
+            "python_version": "3.8"
         },
         "sources": [
             {
@@ -30,6 +30,12 @@
             ],
             "index": "pypi",
             "version": "==6.7"
+        },
+        "pycrypto": {
+            "hashes": [
+                "sha256:f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"
+            ],
+            "version": "==2.6.1"
         },
         "pycryptodome": {
             "hashes": [
