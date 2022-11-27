@@ -6,7 +6,7 @@ If you find problems with the file format (in particular security related issues
 
 ## Requirements
 
-  - [Python 3.7](https://www.python.org/downloads/)
+  - [Python 3.10](https://www.python.org/downloads/)
   - [pipenv](https://github.com/pypa/pipenv)
   - An encrypted OTP Auth backup/account file
 
