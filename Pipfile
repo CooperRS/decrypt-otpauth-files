@@ -7,7 +7,7 @@ name = "pypi"
 
 [packages]
 rncryptor = "==3.2.0"
-bpylist = "==0.1.4"
+bpylist2 = "==4.0.1"
 click = "==6.7"
 pyqrcode = "==1.2.1"
 pycryptodome = "==3.9.1"
