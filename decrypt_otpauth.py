@@ -8,8 +8,8 @@ from urllib.parse import quote
 
 import pyqrcode
 
-from bpylist import archiver
-from bpylist.archive_types import uid
+from bpylist2 import archiver
+from plistlib import UID
 
 from Crypto.Cipher import AES
 
@@ -179,7 +179,7 @@ class DangerousUnarchive(archiver.Unarchive):
             return raw_obj
 
         class_uid = raw_obj.get('$class')
-        if not isinstance(class_uid, uid):
+        if not isinstance(class_uid, UID):
             raise archiver.MissingClassUID(raw_obj)
 
         klass = self.class_for_uid(class_uid)

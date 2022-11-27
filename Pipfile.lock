@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3a9aa3cf92e33eb33f1ae837e0b466ec0827564e1abc6766112371ee29d937c3"
+            "sha256": "859720381b640afb70a49d3416240a0ce85703e2b95fddf246f3d7b995870af7"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7"
+            "python_version": "3.10"
         },
         "sources": [
             {
@@ -16,12 +16,13 @@
         ]
     },
     "default": {
-        "bpylist": {
+        "bpylist2": {
             "hashes": [
-                "sha256:ac065c9f7b804a201999ebbc31b02df18e0fc29e03bcb1eac3e63696599b88ce"
+                "sha256:92a4fe810f919777e22623d6c90c4ee70cc8cbd156bc8297313221c85bc2f2da",
+                "sha256:ae36e14f856100a1a2a60ecdbf703fab949932cea6a1ba562299452983906969"
             ],
             "index": "pypi",
-            "version": "==0.1.4"
+            "version": "==4.0.1"
         },
         "click": {
             "hashes": [
@@ -30,6 +31,12 @@
             ],
             "index": "pypi",
             "version": "==6.7"
+        },
+        "pycrypto": {
+            "hashes": [
+                "sha256:f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"
+            ],
+            "version": "==2.6.1"
         },
         "pycryptodome": {
             "hashes": [
