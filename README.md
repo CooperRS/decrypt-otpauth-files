@@ -28,13 +28,17 @@ pipenv install
 3. Decrypt your OTP Auth file
 
 ```
-# Decrypt a full backup file
+# Decrypt a full backup file and print QR codes to the terminal
 pipenv run python decrypt_otpauth.py decrypt_backup --encrypted-otpauth-backup <path to your OTP Auth backup>
+# Decrypt a full backup file and export to a json file
+pipenv run python decrypt_otpauth.py decrypt_backup --encrypted-otpauth-backup <path to your OTP Auth backup> --export --no-qr
 ```
 
 ```
-# Decrypt a single account export
+# Decrypt a single account export and print QR code to the terminal
 pipenv run python decrypt_otpauth.py decrypt_account --encrypted-otpauth-account <path to your OTP Auth account>
+# Decrypt a single account export and export to a json file
+pipenv run python decrypt_otpauth.py decrypt_account --encrypted-otpauth-account <path to your OTP Auth account> --export --no-qr
 ```
 
 ## Demo
