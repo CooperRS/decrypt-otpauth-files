@@ -2,7 +2,10 @@ import base64
 import click
 import getpass
 import hashlib
+import json
+import os
 
+from datetime import datetime
 from enum import Enum
 from urllib.parse import quote
 
@@ -145,6 +148,9 @@ class OTPAccount:
         otp_parameters = '&'.join([f'{str(k)}={quote(str(v))}' for (k, v) in otp_parameters.items() if v])
         return f'otpauth://{otp_type}/{otp_label}?{otp_parameters}'
 
+    def to_dict(self):
+        return {"label": self.label, "issuer": self.issuer, "secret": base64.b32encode(self.secret).decode("utf-8").rstrip("="), "type": self.type.uri_value, "algorithm": self.algorithm.uri_value, "digits": self.digits, "counter": self.counter, "period": self.period, "uri": self.otp_uri()}
+
 
 archiver.update_class_map({'NSMutableData': MutableData})
 archiver.update_class_map({'NSMutableString': MutableString})
@@ -207,7 +213,15 @@ def cli():
               help="path to your encrypted OTP Auth account (.otpauth)",
               required=True,
               type=click.File('rb'))
-def decrypt_account(encrypted_otpauth_account):
+@click.option('--qr/--no-qr',
+              help="Print QR code to terminal",
+              required=False,
+              default=True)
+@click.option('--export/--no-export',
+              help="Export decrypted account to a json file",
+              required=False,
+              default=False)
+def decrypt_account(encrypted_otpauth_account, qr, export):
     # Get password from user
     password = getpass.getpass(f'Password for export file {encrypted_otpauth_account.name}: ')
 
@@ -230,7 +244,14 @@ def decrypt_account(encrypted_otpauth_account):
         click.echo(f'Encountered unknow file version: {archive["Version"]}')
         return
 
-    render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+    if qr:
+        render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+
+    if export:
+        filename = os.path.splitext(encrypted_otpauth_account.name)[0] + '.json'
+        with open(filename, 'w') as f:
+            f.write(json.dumps(account.to_dict()))
+        click.echo(f'Exported decrypted account to {filename}')
 
 
 def decrypt_account_11(archive, password):
@@ -266,7 +287,15 @@ def decrypt_account_12(archive, password):
               help="path to your encrypted OTP Auth backup (.otpauthdb)",
               required=True,
               type=click.File('rb'))
-def decrypt_backup(encrypted_otpauth_backup):
+@click.option('--qr/--no-qr',
+              help="Print QR code to terminal",
+              required=False,
+              default=True)
+@click.option('--export/--no-export',
+              help="Export decrypted account to a json file",
+              required=False,
+              default=False)
+def decrypt_backup(encrypted_otpauth_backup, qr, export):
     # Get password from user
     password = getpass.getpass(f'Password for export file {encrypted_otpauth_backup.name}: ')
 
@@ -289,9 +318,16 @@ def decrypt_backup(encrypted_otpauth_backup):
         click.echo(f'Encountered unknow file version: {archive["Version"]}')
         return
 
-    for account in accounts:
-        render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
-        input("Press Enter to continue...")
+    if qr:
+        for account in accounts:
+            render_qr_to_terminal(account.otp_uri(), account.type, account.issuer, account.label)
+            input("Press Enter to continue...")
+
+    if export:
+        filename = os.path.splitext(encrypted_otpauth_backup.name)[0] + '.json'
+        with open(filename, 'w') as f:
+            f.write(json.dumps([acc.to_dict() for acc in accounts]))
+        click.echo(f'Exported decrypted backup to {filename}')
 
 
 def decrypt_backup_10(archive, password):
